@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado ETSP - Marinha do Brasil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #007bff;
+        }
+
+        .question h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.5;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            margin-bottom: 15px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .options label:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+            transform: translateX(5px);
+        }
+
+        .options input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #ffc107; }
+        .score.needs-improvement { color: #dc3545; }
+
+        .review-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .wrong-question {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .wrong-question h4 {
+            color: #c53030;
+            margin-bottom: 15px;
+        }
+
+        .correct-answer {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .question-number {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .timer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .subject-tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚢 Simulado ETSP</h1>
+            <p>Curso Especial para Tripulação de Embarcações de Estado no Serviço Público</p>
+            <p>Marinha do Brasil - 100 Questões</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Questão 1 de 100</div>
+        </div>
+
+        <div class="content">
+            <div class="timer" id="timer">
+                ⏱️ Tempo: 02:00:00
+            </div>
+
+            <!-- Questões serão inseridas aqui pelo JavaScript -->
+            <div id="questionsContainer"></div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>
+                    ← Anterior
+                </button>
+                <div>
+                    <span id="questionCounter">1 / 100</span>
+                </div>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">
+                    Próxima →
+                </button>
+                <button class="btn btn-success" id="finishBtn" onclick="finishExam()" style="display: none;">
+                    Finalizar Prova
+                </button>
+            </div>
+
+            <div class="results" id="results">
+                <h2>Resultado do Simulado</h2>
+                <div class="score" id="scoreDisplay"></div>
+                <p id="scoreMessage"></p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="showReview()">
+                        📋 Revisar Questões Erradas
+                    </button>
+                    <button class="btn btn-secondary" onclick="restartExam()">
+                        🔄 Refazer Simulado
+                    </button>
+                </div>
+            </div>
+
+            <div class="review-section" id="reviewSection">
+                <h2>📋 Revisão das Questões Erradas</h2>
+                <div id="wrongQuestionsContainer"></div>
+                <button class="btn btn-secondary" onclick="hideReview()">
+                    ← Voltar aos Resultados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de dados das questões
+        const questions = [
+            // Embarcação (10 questões)
+            {
+                id: 1,
+                subject: "Embarcação",
+                question: "Segundo a definição da Marinha do Brasil, embarcação é:",
+                options: [
+                    "Qualquer construção destinada exclusivamente ao transporte de pessoas",
+                    "Qualquer construção, inclusive as plataformas flutuantes e as fixas quando rebocadas, sujeita a inscrição na autoridade marítima e suscetível de se locomover na água",
+                    "Apenas navios com mais de 20 metros de comprimento",
+                    "Somente embarcações motorizadas"
+                ],
+                correct: 1
+            },
+            {
+                id: 2,
+                subject: "Embarcação",
+                question: "As embarcações podem ser classificadas quanto ao tipo de navegação em:",
+                options: [
+                    "Apenas navegação interior e marítima",
+                    "Navegação interior, costeira e oceânica",
+                    "Navegação interior, navegação em mar aberto e navegação costeira",
+                    "Somente navegação fluvial e marítima"
+                ],
+                correct: 2
+            },
+            {
+                id: 3,
+                subject: "Embarcação",
+                question: "Uma embarcação miúda é caracterizada por:",
+                options: [
+                    "Ter comprimento superior a 8 metros",
+                    "Ter arqueação bruta superior a 20",
+                    "Ter comprimento igual ou inferior a 8 metros",
+                    "Ser destinada exclusivamente à pesca"
+                ],
+                correct: 2
+            },
+            {
+                id: 4,
+                subject: "Embarcação",
+                question: "Qual é a principal diferença entre uma lancha e um iate?",
+                options: [
+                    "A lancha é sempre menor que o iate",
+                    "O iate possui acomodações para pernoite, a lancha geralmente não",
+                    "A lancha é sempre motorizada, o iate pode ser a vela",
+                    "Não há diferença significativa"
+                ],
+                correct: 1
+            },
+            {
+                id: 5,
+                subject: "Embarcação",
+                question: "As embarcações empregadas na navegação interior são aquelas que:",
+                options: [
+                    "Navegam exclusivamente em rios",
+                    "Navegam em águas interiores, como rios, lagos, canais, lagoas e baías",
+                    "Têm menos de 10 metros de comprimento",
+                    "São destinadas apenas ao transporte de carga"
+                ],
+                correct: 1
+            },
+            {
+                id: 6,
+                subject: "Embarcação",
+                question: "Uma embarcação de esporte e recreio é definida como:",
+                options: [
+                    "Qualquer embarcação utilizada para fins comerciais",
+                    "Embarcação destinada à atividade de esporte, recreio ou lazer, sem fins comerciais",
+                    "Apenas veleiros de competição",
+                    "Embarcações com mais de 24 metros"
+                ],
+                correct: 1
+            },
+            {
+                id: 7,
+                subject: "Embarcação",
+                question: "O que caracteriza uma embarcação mercante?",
+                options: [
+                    "Ser destinada ao transporte de pessoas ou cargas com fins comerciais",
+                    "Ter bandeira estrangeira",
+                    "Possuir mais de 100 toneladas de arqueação bruta",
+                    "Ser construída em estaleiro nacional"
+                ],
+                correct: 0
+            },
+            {
+                id: 8,
+                subject: "Embarcação",
+                question: "As embarcações de guerra são caracterizadas por:",
+                options: [
+                    "Pertencerem à Marinha Mercante",
+                    "Serem pintadas de cinza",
+                    "Pertencerem às Forças Armadas e serem comandadas por militar",
+                    "Terem armamento pesado"
+                ],
+                correct: 2
+            },
+            {
+                id: 9,
+                subject: "Embarcação",
+                question: "Uma embarcação pesqueira é aquela:",
+                options: [
+                    "Que possui equipamentos de pesca esportiva",
+                    "Destinada à captura, processamento ou beneficiamento do pescado",
+                    "Com comprimento superior a 15 metros",
+                    "Registrada na Capitania dos Portos"
+                ],
+                correct: 1
+            },
+            {
+                id: 10,
+                subject: "Embarcação",
+                question: "O que é uma embarcação de apoio marítimo?",
+                options: [
+                    "Embarcação destinada ao apoio logístico a plataformas petrolíferas",
+                    "Qualquer embarcação militar",
+                    "Embarcação de salvamento",
+                    "Embarcação para transporte de passageiros"
+                ],
+                correct: 0
+            },
+
+            // Calado (8 questões)
+            {
+                id: 11,
+                subject: "Calado",
+                question: "Calado é definido como:",
+                options: [
+                    "A largura máxima da embarcação",
+                    "A distância vertical entre a quilha e a linha d'água",
+                    "O comprimento total da embarcação",
+                    "A altura do mastro principal"
+                ],
+                correct: 1
+            },
+            {
+                id: 12,
+                subject: "Calado",
+                question: "O calado máximo de uma embarcação é determinado por:",
+                options: [
+                    "Seu comprimento total",
+                    "Sua capacidade de carga e estabilidade",
+                    "O tipo de motor instalado",
+                    "A altura da superestrutura"
+                ],
+                correct: 1
+            },
+            {
+                id: 13,
+                subject: "Calado",
+                question: "Uma embarcação com calado de 2 metros necessita de profundidade mínima de:",
+                options: [
+                    "Exatamente 2 metros",
+                    "Pelo menos 2,5 metros para navegação segura",
+                    "1,5 metros",
+                    "3 metros obrigatoriamente"
+                ],
+                correct: 1
+            },
+            {
+                id: 14,
+                subject: "Calado",
+                question: "O calado varia conforme:",
+                options: [
+                    "Apenas a temperatura da água",
+                    "O peso da embarcação e distribuição da carga",
+                    "A velocidade de navegação",
+                    "A direção do vento"
+                ],
+                correct: 1
+            },
+            {
+                id: 15,
+                subject: "Calado",
+                question: "Em águas salgadas, comparado às águas doces, o calado:",
+                options: [
+                    "Permanece igual",
+                    "Aumenta ligeiramente",
+                    "Diminui ligeiramente devido à maior densidade da água salgada",
+                    "Varia conforme a temperatura"
+                ],
+                correct: 2
+            },
+            {
+                id: 16,
+                subject: "Calado",
+                question: "O calado de uma embarcação é importante para:",
+                options: [
+                    "Determinar a velocidade máxima",
+                    "Calcular o consumo de combustível",
+                    "Verificar se pode navegar em determinada profundidade",
+                    "Definir o número de passageiros"
+                ],
+                correct: 2
+            },
+            {
+                id: 17,
+                subject: "Calado",
+                question: "Uma embarcação 'encalhada' significa que:",
+                options: [
+                    "Está ancorada corretamente",
+                    "Tocou o fundo devido ao calado insuficiente da água",
+                    "Está com problemas no motor",
+                    "Perdeu o rumo"
+                ],
+                correct: 1
+            },
+            {
+                id: 18,
+                subject: "Calado",
+                question: "Para evitar encalhe, o navegante deve:",
+                options: [
+                    "Navegar sempre em alta velocidade",
+                    "Conhecer o calado da embarcação e a profundidade local",
+                    "Usar apenas GPS",
+                    "Navegar somente durante o dia"
+                ],
+                correct: 1
+            },
+
+            // Sistema de Propulsão (8 questões)
+            {
+                id: 19,
+                subject: "Sistema de Propulsão",
+                question: "Os principais tipos de propulsão naval são:",
+                options: [
+                    "Apenas motor diesel e gasolina",
+                    "Remos, vela, motor a vapor, motor diesel e turbina",
+                    "Somente motores elétricos",
+                    "Apenas propulsão nuclear"
+                ],
+                correct: 1
+            },
+            {
+                id: 20,
+                subject: "Sistema de Propulsão",
+                question: "A propulsão diesel-elétrica é caracterizada por:",
+                options: [
+                    "Usar apenas energia solar",
+                    "Motor diesel gerando energia elétrica para motores elétricos de propulsão",
+                    "Ser mais lenta que a propulsão convencional",
+                    "Funcionar apenas em águas rasas"
+                ],
+                correct: 1
+            },
+            {
+                id: 21,
+                subject: "Sistema de Propulsão",
+                question: "A vantagem do motor diesel sobre o motor a gasolina em embarcações é:",
+                options: [
+                    "Menor peso",
+                    "Maior economia de combustível e menor risco de incêndio",
+                    "Maior velocidade",
+                    "Menor custo inicial"
+                ],
+                correct: 1
+            },
+            {
+                id: 22,
+                subject: "Sistema de Propulsão",
+                question: "O sistema de propulsão azimutal permite:",
+                options: [
+                    "Apenas movimento para frente",
+                    "Rotação de 360 graus da hélice, proporcionando maior manobrabilidade",
+                    "Somente navegação em linha reta",
+                    "Funcionar apenas em marcha ré"
+                ],
+                correct: 1
+            },
+            {
+                id: 23,
+                subject: "Sistema de Propulsão",
+                question: "Em embarcações pequenas, o tipo de propulsão mais comum é:",
+                options: [
+                    "Turbina a gás",
+                    "Motor de popa (outboard)",
+                    "Propulsão nuclear",
+                    "Motor a vapor"
+                ],
+                correct: 1
+            },
+            {
+                id: 24,
+                subject: "Sistema de Propulsão",
+                question: "A propulsão por jato d'água (jet drive) é vantajosa porque:",
+                options: [
+                    "Consome menos combustível",
+                    "Não possui hélice externa, reduzindo riscos em águas rasas",
+                    "É mais silenciosa",
+                    "Tem maior velocidade"
+                ],
+                correct: 1
+            },
+            {
+                id: 25,
+                subject: "Sistema de Propulsão",
+                question: "O sistema de propulsão de uma embarcação inclui:",
+                options: [
+                    "Apenas o motor",
+                    "Motor, transmissão, eixo propulsor e hélice",
+                    "Somente a hélice",
+                    "Apenas o combustível"
+                ],
+                correct: 1
+            },
+            {
+                id: 26,
+                subject: "Sistema de Propulsão",
+                question: "A manutenção preventiva do sistema de propulsão deve incluir:",
+                options: [
+                    "Apenas troca de óleo",
+                    "Verificação de óleo, filtros, correias, sistema de arrefecimento e combustível",
+                    "Somente limpeza externa",
+                    "Apenas verificação da hélice"
+                ],
+                correct: 1
+            },
+
+            // Eixo Propulsor (6 questões)
+            {
+                id: 27,
+                subject: "Eixo Propulsor",
+                question: "O eixo propulsor tem a função de:",
+                options: [
+                    "Armazenar combustível",
+                    "Transmitir a potência do motor para a hélice",
+                    "Controlar a direção da embarcação",
+                    "Resfriar o motor"
+                ],
+                correct: 1
+            },
+            {
+                id: 28,
+                subject: "Eixo Propulsor",
+                question: "Os principais componentes do eixo propulsor são:",
+                options: [
+                    "Apenas o eixo metálico",
+                    "Eixo, mancais, vedações e acoplamentos",
+                    "Somente a hélice",
+                    "Motor e combustível"
+                ],
+                correct: 1
+            },
+            {
+                id: 29,
+                subject: "Eixo Propulsor",
+                question: "A vedação do eixo propulsor é importante para:",
+                options: [
+                    "Aumentar a velocidade",
+                    "Evitar entrada de água no casco da embarcação",
+                    "Melhorar o combustível",
+                    "Reduzir o ruído"
+                ],
+                correct: 1
+            },
+            {
+                id: 30,
+                subject: "Eixo Propulsor",
+                question: "Os mancais do eixo propulsor servem para:",
+                options: [
+                    "Aumentar a potência",
+                    "Suportar e permitir a rotação do eixo",
+                    "Armazenar óleo",
+                    "Controlar a temperatura"
+                ],
+                correct: 1
+            },
+            {
+                id: 31,
+                subject: "Eixo Propulsor",
+                question: "Vibrações excessivas no eixo propulsor podem indicar:",
+                options: [
+                    "Funcionamento normal",
+                    "Desalinhamento, desgaste dos mancais ou problemas na hélice",
+                    "Excesso de potência",
+                    "Falta de combustível"
+                ],
+                correct: 1
+            },
+            {
+                id: 32,
+                subject: "Eixo Propulsor",
+                question: "A manutenção do eixo propulsor inclui:",
+                options: [
+                    "Apenas limpeza externa",
+                    "Lubrificação dos mancais, verificação do alinhamento e inspeção das vedações",
+                    "Somente pintura",
+                    "Apenas troca de óleo do motor"
+                ],
+                correct: 1
+            },
+
+            // Hélice (8 questões)
+            {
+                id: 33,
+                subject: "Hélice",
+                question: "A hélice de uma embarcação tem a função de:",
+                options: [
+                    "Controlar a direção",
+                    "Converter a rotação do motor em empuxo para mover a embarcação",
+                    "Armazenar energia",
+                    "Resfriar o motor"
+                ],
+                correct: 1
+            },
+            {
+                id: 34,
+                subject: "Hélice",
+                question: "Uma hélice de passo fixo significa que:",
+                options: [
+                    "Não pode ser removida",
+                    "O ângulo das pás não pode ser alterado",
+                    "Gira sempre na mesma velocidade",
+                    "É feita de material fixo"
+                ],
+                correct: 1
+            },
+            {
+                id: 35,
+                subject: "Hélice",
+                question: "O número de pás mais comum em hélices de embarcações de recreio é:",
+                options: [
+                    "Duas pás",
+                    "Três pás",
+                    "Cinco pás",
+                    "Seis pás"
+                ],
+                correct: 1
+            },
+            {
+                id: 36,
+                subject: "Hélice",
+                question: "Uma hélice danificada pode causar:",
+                options: [
+                    "Apenas ruído",
+                    "Vibração, perda de eficiência e danos ao eixo propulsor",
+                    "Melhoria na velocidade",
+                    "Economia de combustível"
+                ],
+                correct: 1
+            },
+            {
+                id: 37,
+                subject: "Hélice",
+                question: "O material mais comum para hélices de embarcações pequenas é:",
+                options: [
+                    "Madeira",
+                    "Liga de bronze ou alumínio",
+                    "Plástico comum",
+                    "Ferro fundido"
+                ],
+                correct: 1
+            },
+            {
+                id: 38,
+                subject: "Hélice",
+                question: "O diâmetro da hélice influencia:",
+                options: [
+                    "Apenas a aparência",
+                    "A eficiência e o desempenho da embarcação",
+                    "Somente o peso",
+                    "Apenas o custo"
+                ],
+                correct: 1
+            },
+            {
+                id: 39,
+                subject: "Hélice",
+                question: "Uma hélice de passo controlável permite:",
+                options: [
+                    "Apenas mudança de direção",
+                    "Alterar o ângulo das pás para otimizar o desempenho",
+                    "Somente parar o motor",
+                    "Mudar a cor das pás"
+                ],
+                correct: 1
+            },
+            {
+                id: 40,
+                subject: "Hélice",
+                question: "Para proteger a hélice e o eixo, muitas embarcações usam:",
+                options: [
+                    "Tinta especial",
+                    "Ânodo de sacrifício (zinco)",
+                    "Óleo especial",
+                    "Filtro de água"
+                ],
+                correct: 1
+            },
+
+            // Roda do Leme (5 questões)
+            {
+                id: 41,
+                subject: "Roda do Leme",
+                question: "A roda do leme serve para:",
+                options: [
+                    "Controlar a velocidade da embarcação",
+                    "Controlar a direção da embarcação através do leme",
+                    "Ligar o motor",
+                    "Controlar as luzes"
+                ],
+                correct: 1
+            },
+            {
+                id: 42,
+                subject: "Roda do Leme",
+                question: "Quando se gira a roda do leme para boreste (direita):",
+                options: [
+                    "A proa vai para bombordo (esquerda)",
+                    "A proa vai para boreste (direita)",
+                    "A embarcação para",
+                    "A velocidade aumenta"
+                ],
+                correct: 1
+            },
+            {
+                id: 43,
+                subject: "Roda do Leme",
+                question: "Em embarcações pequenas, a roda do leme pode ser substituída por:",
+                options: [
+                    "Pedais",
+                    "Cana do leme",
+                    "Joystick apenas",
+                    "Controle remoto"
+                ],
+                correct: 1
+            },
+            {
+                id: 44,
+                subject: "Roda do Leme",
+                question: "O sistema de direção hidráulico em embarcações:",
+                options: [
+                    "É mais pesado que o mecânico",
+                    "Oferece maior suavidade e precisão no controle",
+                    "Consome mais combustível",
+                    "É menos confiável"
+                ],
+                correct: 1
+            },
+            {
+                id: 45,
+                subject: "Roda do Leme",
+                question: "A manutenção da roda do leme inclui:",
+                options: [
+                    "Apenas limpeza",
+                    "Verificação dos cabos, fluido hidráulico e lubrificação",
+                    "Somente pintura",
+                    "Apenas verificação visual"
+                ],
+                correct: 1
+            },
+
+            // Espias (5 questões)
+            {
+                id: 46,
+                subject: "Espias",
+                question: "Espias são:",
+                options: [
+                    "Equipamentos de navegação",
+                    "Cabos utilizados para amarração da embarcação",
+                    "Instrumentos de medição",
+                    "Peças do motor"
+                ],
+                correct: 1
+            },
+            {
+                id: 47,
+                subject: "Espias",
+                question: "Os tipos principais de espias são:",
+                options: [
+                    "Apenas lançantes",
+                    "Lançantes e espringues",
+                    "Somente espringues",
+                    "Cabos de aço apenas"
+                ],
+                correct: 1
+            },
+            {
+                id: 48,
+                subject: "Espias",
+                question: "Lançantes são espias que:",
+                options: [
+                    "Saem perpendiculares ao cais",
+                    "Saem paralelas ao cais",
+                    "São usadas apenas para reboque",
+                    "Servem para ancorar"
+                ],
+                correct: 0
+            },
+            {
+                id: 49,
+                subject: "Espias",
+                question: "Espringues são espias que:",
+                options: [
+                    "Saem perpendiculares ao cais",
+                    "Saem da proa para ré e da popa para vante, evitando movimento longitudinal",
+                    "São usadas apenas em emergência",
+                    "Servem para içar cargas"
+                ],
+                correct: 1
+            },
+            {
+                id: 50,
+                subject: "Espias",
+                question: "A função principal das espias é:",
+                options: [
+                    "Aumentar a velocidade",
+                    "Manter a embarcação segura junto ao cais ou outra embarcação",
+                    "Melhorar a navegação",
+                    "Economizar combustível"
+                ],
+                correct: 1
+            },
+
+            // Cabeço e Cabeço Singelo (4 questões)
+            {
+                id: 51,
+                subject: "Cabeço",
+                question: "Um cabeço é:",
+                options: [
+                    "Parte do motor",
+                    "Estrutura fixa usada para amarração de cabos",
+                    "Equipamento de navegação",
+                    "Tipo de âncora"
+                ],
+                correct: 1
+            },
+            {
+                id: 52,
+                subject: "Cabeço",
+                question: "Cabeço singelo é:",
+                options: [
+                    "Um cabeço com formato especial",
+                    "Cabeço simples usado para fixar uma espia ou boça",
+                    "Cabeço duplo",
+                    "Cabeço móvel"
+                ],
+                correct: 1
+            },
+            {
+                id: 53,
+                subject: "Cabeço",
+                question: "Os cabeços são encontrados:",
+                options: [
+                    "Apenas em navios grandes",
+                    "Tanto nas embarcações quanto nos cais e terminais",
+                    "Somente em portos",
+                    "Apenas em embarcações militares"
+                ],
+                correct: 1
+            },
+            {
+                id: 54,
+                subject: "Cabeço",
+                question: "A capacidade de carga de um cabeço deve ser:",
+                options: [
+                    "Sempre a mesma",
+                    "Adequada às forças que serão aplicadas pela embarcação",
+                    "Mínima possível",
+                    "Definida apenas pela aparência"
+                ],
+                correct: 1
+            },
+
+            // Buzina (4 questões)
+            {
+                id: 55,
+                subject: "Buzina",
+                question: "A buzina de uma embarcação serve para:",
+                options: [
+                    "Apenas fazer ruído",
+                    "Emitir sinais sonoros para comunicação e segurança",
+                    "Assustar peixes",
+                    "Testar o sistema elétrico"
+                ],
+                correct: 1
+            },
+            {
+                id: 56,
+                subject: "Buzina",
+                question: "Segundo o RIPEAM, um apito longo tem duração de:",
+                options: [
+                    "1 segundo",
+                    "4 a 6 segundos",
+                    "10 segundos",
+                    "2 segundos"
+                ],
+                correct: 1
+            },
+            {
+                id: 57,
+                subject: "Buzina",
+                question: "Um apito curto, segundo o RIPEAM, tem duração de:",
+                options: [
+                    "Aproximadamente 1 segundo",
+                    "3 segundos",
+                    "5 segundos",
+                    "30 segundos"
+                ],
+                correct: 0
+            },
+            {
+                id: 58,
+                subject: "Buzina",
+                question: "A buzina deve ser audível a uma distância mínima de:",
+                options: [
+                    "100 metros",
+                    "Conforme especificado para o tamanho da embarcação",
+                    "50 metros",
+                    "1 quilômetro"
+                ],
+                correct: 1
+            },
+
+            // Atracação (5 questões)
+            {
+                id: 59,
+                subject: "Atracação",
+                question: "Atracação é:",
+                options: [
+                    "O ato de ancorar a embarcação",
+                    "O ato de posicionar e amarrar a embarcação junto ao cais",
+                    "Acelerar a embarcação",
+                    "Parar o motor"
+                ],
+                correct: 1
+            },
+            {
+                id: 60,
+                subject: "Atracação",
+                question: "Durante a atracação, deve-se considerar:",
+                options: [
+                    "Apenas a velocidade",
+                    "Vento, corrente, maré e tráfego de outras embarcações",
+                    "Somente o tamanho da embarcação",
+                    "Apenas a hora do dia"
+                ],
+                correct: 1
+            },
+            {
+                id: 61,
+                subject: "Atracação",
+                question: "A aproximação para atracação deve ser feita:",
+                options: [
+                    "Em alta velocidade",
+                    "Com velocidade controlada e ângulo adequado",
+                    "Sempre em linha reta",
+                    "Somente com vento favorável"
+                ],
+                correct: 1
+            },
+            {
+                id: 62,
+                subject: "Atracação",
+                question: "As defensas durante a atracação servem para:",
+                options: [
+                    "Aumentar a velocidade",
+                    "Proteger o casco da embarcação contra impactos",
+                    "Melhorar a aparência",
+                    "Economizar combustível"
+                ],
+                correct: 1
+            },
+            {
+                id: 63,
+                subject: "Atracação",
+                question: "Após a atracação, a primeira providência é:",
+                options: [
+                    "Desligar todas as luzes",
+                    "Passar e fixar adequadamente as espias",
+                    "Acelerar o motor",
+                    "Abrir todas as escotilhas"
+                ],
+                correct: 1
+            },
+
+            // Amarra (4 questões)
+            {
+                id: 64,
+                subject: "Amarra",
+                question: "A amarra é:",
+                options: [
+                    "Parte do motor",
+                    "Cabo ou corrente que liga a âncora à embarcação",
+                    "Tipo de combustível",
+                    "Equipamento de navegação"
+                ],
+                correct: 1
+            },
+            {
+                id: 65,
+                subject: "Amarra",
+                question: "O comprimento da amarra deve ser:",
+                options: [
+                    "Sempre igual ao calado",
+                    "Proporcional à profundidade local (geralmente 3 a 7 vezes)",
+                    "Sempre 10 metros",
+                    "Igual ao comprimento da embarcação"
+                ],
+                correct: 1
+            },
+            {
+                id: 66,
+                subject: "Amarra",
+                question: "A amarra deve ser marcada para:",
+                options: [
+                    "Decoração",
+                    "Controlar o comprimento liberado durante o fundeio",
+                    "Identificar o proprietário",
+                    "Melhorar a resistência"
+                ],
+                correct: 1
+            },
+            {
+                id: 67,
+                subject: "Amarra",
+                question: "Em caso de mau tempo, o comprimento da amarra deve ser:",
+                options: [
+                    "Reduzido",
+                    "Aumentado para maior segurança",
+                    "Mantido igual",
+                    "Completamente recolhido"
+                ],
+                correct: 1
+            },
+
+            // Âncoras Tipos (6 questões)
+            {
+                id: 68,
+                subject: "Âncoras",
+                question: "A âncora tipo Danforth é caracterizada por:",
+                options: [
+                    "Ter formato redondo",
+                    "Possuir duas pás articuladas e ser eficiente em fundos de areia e lama",
+                    "Ser muito pesada",
+                    "Funcionar apenas em pedras"
+                ],
+                correct: 1
+            },
+            {
+                id: 69,
+                subject: "Âncoras",
+                question: "A âncora tipo Bruce é conhecida por:",
+                options: [
+                    "Ter formato de garra e boa aderência em vários tipos de fundo",
+                    "Ser a mais barata",
+                    "Funcionar apenas em águas rasas",
+                    "Ter apenas uma pá"
+                ],
+                correct: 0
+            },
+            {
+                id: 70,
+                subject: "Âncoras",
+                question: "A âncora do Almirantado é caracterizada por:",
+                options: [
+                    "Ser moderna e leve",
+                    "Ter formato tradicional com haste e duas pás fixas",
+                    "Ser dobrável",
+                    "Funcionar apenas em águas profundas"
+                ],
+                correct: 1
+            },
+            {
+                id: 71,
+                subject: "Âncoras",
+                question: "Para embarcações pequenas, o tipo de âncora mais recomendado é:",
+                options: [
+                    "Âncora de 100 kg",
+                    "Âncora adequada ao tamanho da embarcação e tipo de fundo",
+                    "Qualquer âncora disponível",
+                    "Âncora de ferro fundido"
+                ],
+                correct: 1
+            },
+            {
+                id: 72,
+                subject: "Âncoras",
+                question: "A âncora tipo Delta é:",
+                options: [
+                    "Igual à âncora Bruce",
+                    "Uma evolução da âncora arado, com boa performance",
+                    "Usada apenas em navios grandes",
+                    "Feita apenas de alumínio"
+                ],
+                correct: 1
+            },
+            {
+                id: 73,
+                subject: "Âncoras",
+                question: "O peso da âncora deve ser proporcional:",
+                options: [
+                    "Apenas ao gosto do proprietário",
+                    "Ao tamanho e deslocamento da embarcação",
+                    "Somente à profundidade",
+                    "Apenas ao tipo de fundo"
+                ],
+                correct: 1
+            },
+
+            // Tipos de Cabos (5 questões)
+            {
+                id: 74,
+                subject: "Tipos de Cabos",
+                question: "Os cabos de polipropileno têm a característica de:",
+                options: [
+                    "Afundar na água",
+                    "Flutuar na água e ser econômico",
+                    "Ser muito pesado",
+                    "Não resistir ao sol"
+                ],
+                correct: 1
+            },
+            {
+                id: 75,
+                subject: "Tipos de Cabos",
+                question: "Os cabos de poliéster são:",
+                options: [
+                    "Os mais baratos",
+                    "Muito utilizados na náutica por sua resistência e durabilidade",
+                    "Usados apenas em navios grandes",
+                    "Inadequados para uso marítimo"
+                ],
+                correct: 1
+            },
+            {
+                id: 76,
+                subject: "Tipos de Cabos",
+                question: "Cabos de nylon (poliamida) são conhecidos por:",
+                options: [
+                    "Serem rígidos",
+                    "Terem boa elasticidade e resistência",
+                    "Não resistirem à água",
+                    "Serem descartáveis"
+                ],
+                correct: 1
+            },
+            {
+                id: 77,
+                subject: "Tipos de Cabos",
+                question: "Para amarração de embarcações, os cabos mais adequados são:",
+                options: [
+                    "Cabos de algodão",
+                    "Cabos sintéticos como poliéster ou nylon",
+                    "Cabos de papel",
+                    "Cabos de couro"
+                ],
+                correct: 1
+            },
+            {
+                id: 78,
+                subject: "Tipos de Cabos",
+                question: "A escolha do cabo adequado depende de:",
+                options: [
+                    "Apenas da cor",
+                    "Resistência necessária, tipo de uso e condições ambientais",
+                    "Somente do preço",
+                    "Apenas da marca"
+                ],
+                correct: 1
+            },
+
+            // Primeiros Socorros (6 questões)
+            {
+                id: 79,
+                subject: "Primeiros Socorros",
+                question: "Em caso de acidente a bordo, a primeira providência é:",
+                options: [
+                    "Mover imediatamente o acidentado",
+                    "Avaliar a situação e garantir a segurança do local",
+                    "Dar água ao acidentado",
+                    "Acelerar para o porto mais próximo"
+                ],
+                correct: 1
+            },
+            {
+                id: 80,
+                subject: "Primeiros Socorros",
+                question: "O kit de primeiros socorros de uma embarcação deve conter:",
+                options: [
+                    "Apenas band-aids",
+                    "Materiais para curativos, medicamentos básicos e equipamentos de imobilização",
+                    "Somente remédios para enjoo",
+                    "Apenas gelo"
+                ],
+                correct: 1
+            },
+            {
+                id: 81,
+                subject: "Primeiros Socorros",
+                question: "Em caso de pessoa inconsciente, deve-se:",
+                options: [
+                    "Dar água imediatamente",
+                    "Verificar respiração e pulso, manter vias aéreas desobstruídas",
+                    "Balançar a pessoa vigorosamente",
+                    "Aplicar compressas quentes"
+                ],
+                correct: 1
+            },
+            {
+                id: 82,
+                subject: "Primeiros Socorros",
+                question: "Para queimaduras solares, o tratamento inicial inclui:",
+                options: [
+                    "Aplicar gelo diretamente",
+                    "Resfriar com água, aplicar loção hidratante e proteger do sol",
+                    "Furar as bolhas",
+                    "Aplicar óleo"
+                ],
+                correct: 1
+            },
+            {
+                id: 83,
+                subject: "Primeiros Socorros",
+                question: "Em caso de afogamento, após retirar a pessoa da água:",
+                options: [
+                    "Dar água para beber",
+                    "Verificar consciência e respiração, iniciar ressuscitação se necessário",
+                    "Colocar de cabeça para baixo",
+                    "Dar tapas nas costas"
+                ],
+                correct: 1
+            },
+            {
+                id: 84,
+                subject: "Primeiros Socorros",
+                question: "A posição de recuperação é usada para:",
+                options: [
+                    "Pessoas conscientes",
+                    "Pessoas inconscientes que respiram normalmente",
+                    "Pessoas com fraturas",
+                    "Pessoas com queimaduras"
+                ],
+                correct: 1
+            },
+
+            // Fratura (3 questões)
+            {
+                id: 85,
+                subject: "Fratura",
+                question: "Suspeita-se de fratura quando há:",
+                options: [
+                    "Apenas dor leve",
+                    "Dor intensa, deformidade, inchaço e incapacidade de movimento",
+                    "Somente vermelhidão",
+                    "Apenas coceira"
+                ],
+                correct: 1
+            },
+            {
+                id: 86,
+                subject: "Fratura",
+                question: "O tratamento inicial de uma fratura inclui:",
+                options: [
+                    "Tentar colocar o osso no lugar",
+                    "Imobilizar a área afetada e buscar ajuda médica",
+                    "Massagear o local",
+                    "Aplicar calor"
+                ],
+                correct: 1
+            },
+            {
+                id: 87,
+                subject: "Fratura",
+                question: "Uma pessoa com suspeita de fratura deve ser movimentada:",
+                options: [
+                    "Imediatamente",
+                    "Apenas após imobilização adequada da fratura",
+                    "Sem cuidados especiais",
+                    "Somente se estiver consciente"
+                ],
+                correct: 1
+            },
+
+            // Hemostasia (3 questões)
+            {
+                id: 88,
+                subject: "Hemostasia",
+                question: "Hemostasia é:",
+                options: [
+                    "Tipo de medicamento",
+                    "Processo de controle e parada de hemorragias",
+                    "Equipamento médico",
+                    "Tipo de curativo"
+                ],
+                correct: 1
+            },
+            {
+                id: 89,
+                subject: "Hemostasia",
+                question: "Para controlar hemorragia externa, deve-se:",
+                options: [
+                    "Aplicar gelo apenas",
+                    "Fazer pressão direta sobre o ferimento com material limpo",
+                    "Lavar com água do mar",
+                    "Aplicar álcool"
+                ],
+                correct: 1
+            },
+            {
+                id: 90,
+                subject: "Hemostasia",
+                question: "O torniquete deve ser usado:",
+                options: [
+                    "Em qualquer hemorragia",
+                    "Apenas em casos extremos quando outros métodos falharam",
+                    "Sempre como primeira opção",
+                    "Apenas em hospitais"
+                ],
+                correct: 1
+            },
+
+            // Colete Salva-vidas (4 questões)
+            {
+                id: 91,
+                subject: "Colete Salva-vidas",
+                question: "O colete salva-vidas Classe I é destinado para:",
+                options: [
+                    "Apenas piscinas",
+                    "Navegação oceânica e mar aberto",
+                    "Somente rios",
+                    "Apenas crianças"
+                ],
+                correct: 1
+            },
+            {
+                id: 92,
+                subject: "Colete Salva-vidas",
+                question: "O colete salva-vidas Classe III é adequado para:",
+                options: [
+                    "Navegação oceânica",
+                    "Navegação interior em águas abrigadas",
+                    "Mergulho profundo",
+                    "Uso militar apenas"
+                ],
+                correct: 1
+            },
+            {
+                id: 93,
+                subject: "Colete Salva-vidas",
+                question: "É obrigatório o uso de colete salva-vidas:",
+                options: [
+                    "Apenas em navios grandes",
+                    "Em moto aquáticas e conforme regulamentação para cada tipo de embarcação",
+                    "Somente durante tempestades",
+                    "Apenas para quem não sabe nadar"
+                ],
+                correct: 1
+            },
+            {
+                id: 94,
+                subject: "Colete Salva-vidas",
+                question: "Os coletes salva-vidas devem ser:",
+                options: [
+                    "De qualquer marca",
+                    "Homologados pela DPC (Diretoria de Portos e Costas)",
+                    "Apenas importados",
+                    "Feitos em casa"
+                ],
+                correct: 1
+            },
+
+            // DPC Modelo Aprovado (2 questões)
+            {
+                id: 95,
+                subject: "DPC",
+                question: "DPC significa:",
+                options: [
+                    "Departamento de Pesca Comercial",
+                    "Diretoria de Portos e Costas",
+                    "Divisão de Produtos Certificados",
+                    "Departamento de Proteção Civil"
+                ],
+                correct: 1
+            },
+            {
+                id: 96,
+                subject: "DPC",
+                question: "Equipamentos com modelo aprovado pela DPC:",
+                options: [
+                    "São apenas sugestões",
+                    "Devem obrigatoriamente ser utilizados conforme a regulamentação",
+                    "São mais caros",
+                    "São opcionais"
+                ],
+                correct: 1
+            },
+
+            // RIPEAM (2 questões)
+            {
+                id: 97,
+                subject: "RIPEAM",
+                question: "RIPEAM significa:",
+                options: [
+                    "Regras Internacionais de Pesca Marítima",
+                    "Regulamento Internacional para Evitar Abalroamentos no Mar",
+                    "Registro Internacional de Embarcações Marítimas",
+                    "Regras de Inspeção de Portos Marítimos"
+                ],
+                correct: 1
+            },
+            {
+                id: 98,
+                subject: "RIPEAM",
+                question: "O RIPEAM estabelece:",
+                options: [
+                    "Apenas regras de velocidade",
+                    "Regras de navegação, sinais sonoros e luminosos para evitar colisões",
+                    "Somente regras de ancoragem",
+                    "Apenas regras para navios grandes"
+                ],
+                correct: 1
+            },
+
+            // Sinais de Socorro (1 questão)
+            {
+                id: 99,
+                subject: "Sinais de Socorro",
+                question: "O sinal sonoro de socorro consiste em:",
+                options: [
+                    "Três apitos longos",
+                    "Sinal contínuo de qualquer aparelho sonoro",
+                    "Dois apitos curtos",
+                    "Um apito longo"
+                ],
+                correct: 1
+            },
+
+            // Lei 9966 (1 questão)
+            {
+                id: 100,
+                subject: "Lei 9966",
+                question: "A Lei 9966/2000 trata sobre:",
+                options: [
+                    "Registro de embarcações",
+                    "Prevenção, controle e fiscalização da poluição causada por lançamento de óleo em águas",
+                    "Licenciamento de condutores",
+                    "Construção naval"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Variáveis globais
+        let currentQuestion = 0;
+        let userAnswers = {};
+        let timeLeft = 7200; // 2 horas em segundos
+        let timerInterval;
+
+        // Inicializar o simulado
+        function initExam() {
+            displayQuestion();
+            updateProgress();
+            startTimer();
+        }
+
+        // Exibir questão atual
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const question = questions[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="question-container active">
+                    <div class="question">
+                        <div class="question-number">Questão ${currentQuestion + 1}</div>
+                        <span class="subject-tag">${question.subject}</span>
+                        <h3>${question.question}</h3>
+                        <ul class="options">
+                            ${question.options.map((option, index) => `
+                                <li>
+                                    <label>
+                                        <input type="radio" name="q${question.id}" value="${index}" 
+                                               ${userAnswers[question.id] === index ? 'checked' : ''}
+                                               onchange="saveAnswer(${question.id}, ${index})">
+                                        ${String.fromCharCode(65 + index)}) ${option}
+                                    </label>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            updateNavigation();
+        }
+
+        // Salvar resposta
+        function saveAnswer(questionId, answerIndex) {
+            userAnswers[questionId] = answerIndex;
+        }
+
+        // Atualizar navegação
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const finishBtn = document.getElementById('finishBtn');
+            const questionCounter = document.getElementById('questionCounter');
+            
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                finishBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                finishBtn.style.display = 'none';
+            }
+            
+            questionCounter.textContent = `${currentQuestion + 1} / ${questions.length}`;
+        }
+
+        // Próxima questão
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+                updateProgress();
+            }
+        }
+
+        // Questão anterior
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+                updateProgress();
+            }
+        }
+
+        // Atualizar barra de progresso
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Questão ${currentQuestion + 1} de ${questions.length}`;
+        }
+
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            const seconds = timeLeft % 60;
+            
+            document.getElementById('timer').innerHTML = 
+                `⏱️ Tempo: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Finalizar prova
+        function finishExam() {
+            clearInterval(timerInterval);
+            
+            const score = calculateScore();
+            displayResults(score);
+        }
+
+        // Calcular pontuação
+        function calculateScore() {
+            let correct = 0;
+            let total = questions.length;
+            
+            questions.forEach(question => {
+                if (userAnswers[question.id] === question.correct) {
+                    correct++;
+                }
+            });
+            
+            return {
+                correct: correct,
+                total: total,
+                percentage: Math.round((correct / total) * 100)
+            };
+        }
+
+        // Exibir resultados
+        function displayResults(score) {
+            document.querySelector('.content').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
+            
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreMessage = document.getElementById('scoreMessage');
+            
+            scoreDisplay.textContent = `${score.correct}/${score.total} (${score.percentage}%)`;
+            
+            if (score.percentage >= 80) {
+                scoreDisplay.className = 'score excellent';
+                scoreMessage.textContent = 'Excelente! Você está bem preparado para o ETSP.';
+            } else if (score.percentage >= 60) {
+                scoreDisplay.className = 'score good';
+                scoreMessage.textContent = 'Bom resultado! Continue estudando para melhorar ainda mais.';
+            } else {
+                scoreDisplay.className = 'score needs-improvement';
+                scoreMessage.textContent = 'É necessário mais estudo. Revise os conteúdos e tente novamente.';
+            }
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        // Mostrar revisão
+        function showReview() {
+            const wrongQuestions = questions.filter(q => userAnswers[q.id] !== q.correct);
+            
+            if (wrongQuestions.length === 0) {
+                alert('Parabéns! Você acertou todas as questões!');
+                return;
+            }
+            
+            const container = document.getElementById('wrongQuestionsContainer');
+            container.innerHTML = wrongQuestions.map(q => `
+                <div class="wrong-question">
+                    <h4>Questão ${q.id} - ${q.subject}</h4>
+                    <p><strong>Pergunta:</strong> ${q.question}</p>
+                    <p><strong>Sua resposta:</strong> ${userAnswers[q.id] !== undefined ? 
+                        String.fromCharCode(65 + userAnswers[q.id]) + ') ' + q.options[userAnswers[q.id]] : 
+                        'Não respondida'}</p>
+                    <div class="correct-answer">
+                        <strong>Resposta correta:</strong> ${String.fromCharCode(65 + q.correct)}) ${q.options[q.correct]}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('reviewSection').style.display = 'block';
+        }
+
+        // Esconder revisão
+        function hideReview() {
+            document.getElementById('reviewSection').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Reiniciar simulado
+        function restartExam() {
+            currentQuestion = 0;
+            userAnswers = {};
+            timeLeft = 7200;
+            
+            document.querySelector('.content').style.display = 'block';
+            document.querySelector('.progress-container').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('reviewSection').style.display = 'none';
+            
+            initExam();
+        }
+
+        // Inicializar quando a página carregar
+        window.onload = function() {
+            initExam();
+        };
+    </script>
+</body>
+</html>
